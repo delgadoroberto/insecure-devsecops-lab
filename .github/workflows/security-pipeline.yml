@@ -1,0 +1,44 @@
+name: DevSecOps Security Pipeline
+
+on:
+  push:
+
+jobs:
+  security-checks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install security tools
+        run: |
+          pip install bandit pip-audit
+
+      - name: Run Bandit SAST
+        run: |
+          bandit -r .
+
+      - name: Run Dependency Scan
+        run: |
+          pip-audit -r requirements.txt
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+
+      - name: Build Docker image
+        run: |
+          docker build -t insecure-devsecops-lab .
+
+      - name: Run Trivy scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: insecure-devsecops-lab
+          format: table
+          exit-code: 1
+          severity: HIGH,CRITICAL
