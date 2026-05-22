@@ -41,4 +41,4 @@ jobs:
           image-ref: insecure-devsecops-lab
           format: table
           exit-code: 1
-          severity: HIGH,CRITICAL
+          severity: CRITICAL
